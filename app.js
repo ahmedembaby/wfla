@@ -1,4 +1,4 @@
-const { Client, GroupChat, MessageMedia, LocalAuth } = require('whatsapp-web.js');
+const { Client, Chat, GroupChat, MessageMedia, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
 const socketIO = require('socket.io');
 const qrcode = require('qrcode');
@@ -333,7 +333,7 @@ const hash = req.body.hash;
 app.post('/lame', async (req, res) => {
      console.log(req);
      const sender = req.body.sender;
-       const client = sessions.find(sess => sess.id == sender).chat;
+       const message = sessions.find(sess => sess.id == sender).chat;
          // Make sure the sender is exists & ready
   if (!client) {
     return res.status(422).json({
@@ -341,7 +341,7 @@ app.post('/lame', async (req, res) => {
       message: `The sender: ${sender} is not found!`
     })
   }
- const mychats = await client.lastMessage();
+ const mychats = await message.lastMessage();
  res.send(mychats)
 
 });
