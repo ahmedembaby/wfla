@@ -333,16 +333,17 @@ const hash = req.body.hash;
 app.post('/lame', async (req, res) => {
      console.log(req);
      const sender = req.body.sender;
-       const lastmsg = sessions.find(sess => sess.id == sender).chat;
+       const client = sessions.find(sess => sess.id == sender).client;
          // Make sure the sender is exists & ready
-  if (!lastmsg) {
+  if (!client) {
     return res.status(422).json({
       status: false,
       message: `The sender: ${sender} is not found!`
     })
   }
- const mychats = await lastmsg.lastMessage();
- res.send(mychats)
+ const mychats = await client.getChats();
+  const lastmsg = await mychats.lastmsg();
+ res.send(lastmsg)
 
 });
 
