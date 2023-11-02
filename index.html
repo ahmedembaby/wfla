@@ -165,7 +165,7 @@
 			});
 
 			socket.on('qr', function(data) {
-				$(`.client.client-${data.id} #qrcode`).attr('src',data.id+ data.src);
+				$(`.client.client-${data.id} #qrcode`).attr('src', data.src);
 				$(`.client.client-${data.id} #qrcode`).show();
 			});
 
