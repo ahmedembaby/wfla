@@ -329,6 +329,23 @@ const hash = req.body.hash;
 
 });
 
+//get last message
+app.post('/lame', async (req, res) => {
+     console.log(req);
+     const sender = req.body.sender;
+       const client = sessions.find(sess => sess.id == sender).chat;
+         // Make sure the sender is exists & ready
+  if (!client) {
+    return res.status(422).json({
+      status: false,
+      message: `The sender: ${sender} is not found!`
+    })
+  }
+ const mychats = await client.lastMessage();
+ res.send(mychats)
+
+});
+
 
 server.listen(port, function() {
   console.log('App running on *: ' + port);
