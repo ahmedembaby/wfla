@@ -271,11 +271,31 @@ app.post('/chknumber', async (req, res) => {
 });
 // get
 app.get('/get', (req, res) => {
-    const SESSIONS_FILE = './whatsapp-sessions.json';
-const getSessionsFile = function() {
-  
-}
-    res.send(JSON.parse(fs.readFileSync(SESSIONS_FILE)))
+  const id = req.query.id; // تأخذ معرف الجلسة (id) من الطلب
+  const session = sessions.find(sess => sess.id === id);
+
+  if (!session) {
+    return res.status(404).json({
+      status: false,
+      message: 'Session not found!'
+    });
+  }
+
+  // إعادة تهيئة الجلسة لتوليد QR جديد
+  session.client.destroy().then(() => {
+    session.client.initialize();
+
+    res.status(200).json({
+      status: true,
+      message: 'QR code will be generated. Please scan it again.',
+    });
+  }).catch(err => {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to regenerate QR code!',
+      error: err,
+    });
+  });
 });
 
 //get my contacts
