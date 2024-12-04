@@ -374,12 +374,12 @@ app.get('/qrcode/:id', (req, res) => {
 io.on('connection', (socket) => {
   console.log('Client connected via WebSocket.');
 
-  socket.on('get-qr', (data) => {
+  io.on('get-qr', (data) => {
     const { id } = data;
     const session = sessions.find(sess => sess.id === id);
 
     if (!session) {
-      socket.emit('qr-error', { message: 'Session not found!' });
+      io.emit('qr-error', { message: 'Session not found!' });
       return;
     }
 
@@ -387,10 +387,10 @@ io.on('connection', (socket) => {
       console.log(`QR Code generated for session ${id}`);
       qrcode.toDataURL(qr, (err, url) => {
         if (err) {
-          socket.emit('qr-error', { message: 'Error generating QR Code' });
+          io.emit('qr-error', { message: 'Error generating QR Code' });
           return;
         }
-        socket.emit('qr-code', { id, qr: url });
+        io.emit('qr-code', { id, qr: url });
       });
     });
   });
