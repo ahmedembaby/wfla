@@ -367,6 +367,35 @@ app.post('/lame', async (req, res) => {
 
 });
 
+app.get('/qrcode/:id', (req, res) => {
+  res.sendFile('qrcode.html', { root: __dirname }); // صفحة تعرض QR Code
+});
+
+io.on('connection', (socket) => {
+  console.log('Client connected via WebSocket.');
+
+  socket.on('get-qr', (data) => {
+    const { id } = data;
+    const session = sessions.find(sess => sess.id === id);
+
+    if (!session) {
+      socket.emit('qr-error', { message: 'Session not found!' });
+      return;
+    }
+
+    session.client.on('qr', (qr) => {
+      console.log(`QR Code generated for session ${id}`);
+      qrcode.toDataURL(qr, (err, url) => {
+        if (err) {
+          socket.emit('qr-error', { message: 'Error generating QR Code' });
+          return;
+        }
+        socket.emit('qr-code', { id, qr: url });
+      });
+    });
+  });
+});
+
 
 server.listen(port, function() {
   console.log('App running on *: ' + port);
