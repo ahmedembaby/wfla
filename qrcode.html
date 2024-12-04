@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Viewer</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+    #qr-container {
+      text-align: center;
+    }
+    img {
+      max-width: 300px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="qr-container">
+    <h1>QR Code for WhatsApp</h1>
+    <div id="qr-status">Loading QR Code...</div>
+    <img id="qr-image" src="" alt="QR Code" style="display:none;">
+  </div>
+
+  <script>
+    const socket = io();
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (!id) {
+      document.getElementById('qr-status').textContent = 'Session ID is missing!';
+      return;
+    }
+
+    // طلب QR Code من السيرفر
+    socket.emit('get-qr', { id });
+
+    // استلام QR Code
+    socket.on('qr-code', (data) => {
+      if (data.id === id) {
+        const qrImage = document.getElementById('qr-image');
+        const qrStatus = document.getElementById('qr-status');
+        qrImage.src = data.qr;
+        qrImage.style.display = 'block';
+        qrStatus.style.display = 'none';
+      }
+    });
+
+    // في حال وجود خطأ
+    socket.on('qr-error', (data) => {
+      document.getElementById('qr-status').textContent = data.message;
+    });
+  </script>
+</body>
+</html>
