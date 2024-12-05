@@ -456,9 +456,9 @@ app.get('/qrcode/:id', (req, res) => {
 });
 
 //عمل session
-app.get('/add-session/:id', (req, res) => {
+app.get('/add-session/:id/:description', (req, res) => {
   const id = req.params.id; // معرّف الجلسة
-  
+  const description = req.params.description; // وصف الجلسة
 
   // تحقق إذا كانت الجلسة موجودة مسبقًا
   const existingSession = sessions.find(sess => sess.id === id);
@@ -469,19 +469,25 @@ app.get('/add-session/:id', (req, res) => {
     `);
   }
 
-  // إنشاء جلسة جديدة
-  const newSession = { id, ready: false };
+  // إنشاء الجلسة الجديدة
+  const newSession = { id, description, ready: false };
   sessions.push(newSession);
+
+  // تحديث ملف الجلسات
+  const savedSessions = getSessionsFile();
+  savedSessions.push(newSession);
+  setSessionsFile(savedSessions);
 
   // إرسال البيانات عبر WebSocket إلى العملاء
   io.emit('message', { id, text: 'New session added' });
 
-  // إرسال استجابة
+  // استجابة للمستخدم
   res.send(`
     <h1>Session Created</h1>
-    <p>Session with ID: ${id} has been created.</p>
+    <p>Session with ID: ${id} and description: "${description}" has been created and saved.</p>
   `);
 });
+
 
 
 
