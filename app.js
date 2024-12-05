@@ -473,7 +473,7 @@ app.get('/qrcode/:id', (req, res) => {
     const { id } = data;
     const session = sessions.find(sess => sess.id === id);
 
-    session.client.on('qr', (qr) => {
+      client.on('qr', (qr) => {
       console.log(`QR Code generated for session ${id}`);
       qrcode.toDataURL(qr, (err, url) => {
         if (err) {
