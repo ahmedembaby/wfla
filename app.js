@@ -368,33 +368,64 @@ app.post('/lame', async (req, res) => {
 });
 
 app.get('/qrcode/:id', (req, res) => {
-  res.sendFile('qrcode.html', { root: __dirname }); // صفحة تعرض QR Code
-});
+  const id = req.params.id; // الحصول على معرف الجلسة من الرابط
+  const session = sessions.find(sess => sess.id === id);
 
-io.on('connection', (socket) => {
-  console.log('Client connected via WebSocket.');
+  if (!session) {
+    return res.status(404).send(`
+      <h1>Session Not Found</h1>
+      <p>Unable to find session for ID: ${id}</p>
+    `);
+  }
 
-  io.on('get-qr', (data) => {
-    const { id } = data;
-    const session = sessions.find(sess => sess.id === id);
-
-    if (!session) {
-      io.emit('qr-error', { message: 'Session not found!' });
-      return;
-    }
-
-    session.client.on('qr', (qr) => {
-      console.log(`QR Code generated for session ${id}`);
-      qrcode.toDataURL(qr, (err, url) => {
-        if (err) {
-          io.emit('qr-error', { message: 'Error generating QR Code' });
-          return;
+  // صفحة تعرض QR Code باستخدام WebSocket
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>QR Code for ID: ${id}</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          margin-top: 50px;
         }
-        io.emit('qr-code', { id, qr: url });
-      });
-    });
-  });
+        img {
+          margin-top: 20px;
+          border: 2px solid #ccc;
+          padding: 10px;
+          border-radius: 5px;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>QR Code for ID: ${id}</h1>
+      <div id="qr-container">
+        <p>Waiting for QR Code...</p>
+      </div>
+      <script>
+        const socket = io();
+
+        socket.emit('get-qr', { id: '${id}' });
+
+        socket.on('qr-code', function(data) {
+          if (data.id === '${id}') {
+            const qrContainer = document.getElementById('qr-container');
+            qrContainer.innerHTML = '<img src="' + data.qr + '" alt="QR Code">';
+          }
+        });
+
+        socket.on('qr-error', function(error) {
+          const qrContainer = document.getElementById('qr-container');
+          qrContainer.innerHTML = '<p style="color:red;">' + error.message + '</p>';
+        });
+      </script>
+    </body>
+    </html>
+  `);
 });
+
 
 
 server.listen(port, function() {
