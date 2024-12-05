@@ -74,8 +74,8 @@
 <body>
 
 	<div id="app">
-		<h1>Whatsapp API</h1>
-		<p>Powered by Flayers</p>
+		<h1>PowerBot</h1>
+		<p>Powered by Embaby</p>
 		<div class="form-container">
 			<label for="client-id">ID</label><br>
 			<input type="text" id="client-id" placeholder="ID">
@@ -101,7 +101,7 @@
 		$(document).ready(function() {
 			var socket = io();
 
-			// Ketika button tambah diklik
+			// add Client
 			$('.add-client-btn').click(function() {
 				var clientId = $('#client-id').val();
 				var clientDescription = $('#client-description').val();
