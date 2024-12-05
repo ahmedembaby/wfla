@@ -368,6 +368,40 @@ app.post('/lame', async (req, res) => {
 });
 
 
+//عمل session
+app.get('/add-session/:id/:description', (req, res) => {
+  const id = req.params.id; // معرّف الجلسة
+  const description = req.params.description; // وصف الجلسة
+
+  // تحقق إذا كانت الجلسة موجودة مسبقًا
+  const existingSession = sessions.find(sess => sess.id === id);
+  if (existingSession) {
+    return res.status(400).send(`
+      <h1>Session Already Exists</h1>
+      <p>Session with ID: ${id} already exists.</p>
+    `);
+  }
+
+  // إنشاء الجلسة الجديدة
+  const newSession = { id, description, ready: false };
+  sessions.push(newSession);
+
+  // تحديث ملف الجلسات
+  const savedSessions = getSessionsFile();
+  savedSessions.push(newSession);
+  setSessionsFile(savedSessions);
+
+  // إرسال البيانات عبر WebSocket إلى العملاء
+  io.emit('message', { id: id, text: 'New session added' });
+
+  // استجابة للمستخدم
+  res.send(`
+    <h1>Session Created</h1>
+    <p>Session with ID: ${id} and description: "${description}" has been created and saved.</p>
+  `);
+});
+
+
 //اظهار qr
 //
 io.on('connection', (socket) => {
@@ -455,38 +489,6 @@ app.get('/qrcode/:id', (req, res) => {
   `);
 });
 
-//عمل session
-app.get('/add-session/:id/:description', (req, res) => {
-  const id = req.params.id; // معرّف الجلسة
-  const description = req.params.description; // وصف الجلسة
-
-  // تحقق إذا كانت الجلسة موجودة مسبقًا
-  const existingSession = sessions.find(sess => sess.id === id);
-  if (existingSession) {
-    return res.status(400).send(`
-      <h1>Session Already Exists</h1>
-      <p>Session with ID: ${id} already exists.</p>
-    `);
-  }
-
-  // إنشاء الجلسة الجديدة
-  const newSession = { id, description, ready: false };
-  sessions.push(newSession);
-
-  // تحديث ملف الجلسات
-  const savedSessions = getSessionsFile();
-  savedSessions.push(newSession);
-  setSessionsFile(savedSessions);
-
-  // إرسال البيانات عبر WebSocket إلى العملاء
-  io.emit('message', { id: id, text: 'New session added' });
-
-  // استجابة للمستخدم
-  res.send(`
-    <h1>Session Created</h1>
-    <p>Session with ID: ${id} and description: "${description}" has been created and saved.</p>
-  `);
-});
 
 
 
