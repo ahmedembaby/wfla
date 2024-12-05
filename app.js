@@ -405,7 +405,7 @@ app.get('/add-session/:id/:description', (req, res) => {
 //اظهار qr
 //
 io.on('connection', (socket) => {
-  console.log('Client connected via WebSocket.');
+  console.log('Ahmed connected via WebSocket.');
 
   socket.on('get-qr', (data) => {
     const { id } = data;
