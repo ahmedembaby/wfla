@@ -181,6 +181,7 @@ init();
 
 // Socket IO
 io.on('connection', function(socket) {
+  console.log('1 connected via WebSocket.');
   init(socket);
 
   socket.on('create-session', function(data) {
@@ -388,8 +389,9 @@ app.get('/add-session/:id/:description', (req, res) => {
 
   // تحديث ملف الجلسات
   const savedSessions = getSessionsFile();
-  savedSessions.push(newSession);
-  setSessionsFile(savedSessions);
+ savedSessions.push(newSession);
+ await setSessionsFile(savedSessions);
+
 
   // إرسال البيانات عبر WebSocket إلى العملاء
   io.emit('message', { id: id, text: 'New session added' });
@@ -405,7 +407,7 @@ app.get('/add-session/:id/:description', (req, res) => {
 //اظهار qr
 //
 io.on('connection', (socket) => {
-  console.log('Ahmed connected via WebSocket.');
+  console.log('2 connected via WebSocket.');
 
   socket.on('get-qr', (data) => {
     const { id } = data;
