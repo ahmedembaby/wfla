@@ -405,32 +405,6 @@ app.get('/add-session/:id/:description', (req, res) => {
 
 
 //اظهار qr
-//
-io.on('connection', (socket) => {
-  console.log('2 connected via WebSocket.');
-
-  socket.on('get-qr', (data) => {
-    const { id } = data;
-    const session = sessions.find(sess => sess.id === id);
-
-    if (!session) {
-      socket.emit('qr-error', { message: 'Session not found!' });
-      return;
-    }
-
-    session.client.on('qr', (qr) => {
-      console.log(`QR Code generated for session ${id}`);
-      qrcode.toDataURL(qr, (err, url) => {
-        if (err) {
-          socket.emit('qr-error', { message: 'Error generating QR Code' });
-          return;
-        }
-        socket.emit('qr-code', { id, qr: url });
-      });
-    });
-  });
-});
-
 
 app.get('/qrcode/:id', (req, res) => {
   const id = req.params.id; // الحصول على معرف الجلسة من الرابط
@@ -491,7 +465,30 @@ app.get('/qrcode/:id', (req, res) => {
   `);
 });
 
+io.on('connection', (socket) => {
+  console.log('2 connected via WebSocket.');
 
+  socket.on('get-qr', (data) => {
+    const { id } = data;
+    const session = sessions.find(sess => sess.id === id);
+
+    if (!session) {
+      socket.emit('qr-error', { message: 'Session not found!' });
+      return;
+    }
+
+    session.client.on('qr', (qr) => {
+      console.log(`QR Code generated for session ${id}`);
+      qrcode.toDataURL(qr, (err, url) => {
+        if (err) {
+          socket.emit('qr-error', { message: 'Error generating QR Code' });
+          return;
+        }
+        socket.emit('qr-code', { id, qr: url });
+      });
+    });
+  });
+});
 
 
 
