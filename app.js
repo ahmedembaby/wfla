@@ -479,7 +479,7 @@ app.get('/add-session/:id/:description', (req, res) => {
   setSessionsFile(savedSessions);
 
   // إرسال البيانات عبر WebSocket إلى العملاء
-  socket.emit('message', { id, text: 'New session added' });
+  io.emit('message', { id: id, text: 'New session added' });
 
   // استجابة للمستخدم
   res.send(`
