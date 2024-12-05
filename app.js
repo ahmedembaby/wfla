@@ -494,17 +494,53 @@ app.get('/qrcode/:id', (req, res) => {
   });
 
   client.initialize();
-    
-      client.on('qr', (qr) => {
-      console.log(`QR Code generated for session ${id}`);
-      qrcode.toDataURL(qr, (err, url) => {
-        if (err) {
+
+
+     client.on('qr', (qr) => {
+    console.log('QR RECEIVED', qr);
+    qrcode.toDataURL(qr, (err, url) => {
+      if (err) {
           socket.emit('qr-error', { message: 'Error generating QR Code' });
           return;
         }
-        socket.emit('qr-code', { id, qr: url });
-      });
+      io.emit('qr-code', { id: id, qr: url });
+      io.emit('message', { id: id, text: 'QR Code received, scan please!' });
     });
+  });
+
+  client.on('ready', () => {
+    io.emit('ready', { id: id });
+    io.emit('message', { id: id, text: 'Whatsapp is ready!' });
+
+    const savedSessions = getSessionsFile();
+    const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
+    savedSessions[sessionIndex].ready = true;
+    setSessionsFile(savedSessions);
+  });
+
+  client.on('authenticated', () => {
+    io.emit('authenticated', { id: id });
+    io.emit('message', { id: id, text: 'Whatsapp is authenticated!' });
+  });
+
+  client.on('auth_failure', function() {
+    io.emit('message', { id: id, text: 'Auth failure, restarting...' });
+  });
+
+  client.on('disconnected', (reason) => {
+    io.emit('message', { id: id, text: 'Whatsapp is disconnected!' });
+    client.destroy();
+    client.initialize();
+
+    // Menghapus pada file sessions
+    const savedSessions = getSessionsFile();
+    const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
+    savedSessions.splice(sessionIndex, 1);
+    setSessionsFile(savedSessions);
+
+    io.emit('remove-session', id);
+  });
+
   });
 });
 
