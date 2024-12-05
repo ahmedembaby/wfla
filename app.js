@@ -390,7 +390,7 @@ app.get('/add-session/:id/:description', (req, res) => {
   // تحديث ملف الجلسات
   const savedSessions = getSessionsFile();
  savedSessions.push(newSession);
- await setSessionsFile(savedSessions);
+ setSessionsFile(savedSessions);
 
 
   // إرسال البيانات عبر WebSocket إلى العملاء
