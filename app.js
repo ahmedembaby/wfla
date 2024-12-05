@@ -504,7 +504,7 @@ app.get('/qrcode/:id', (req, res) => {
           return;
         }
       io.emit('qr-code', { id: id, qr: url });
-      io.emit('message', { id: id, text: 'QR Code received, scan please!' });
+      console.log({ id: id, text: 'QR Code received, scan please!' });
     });
   });
 
@@ -520,15 +520,15 @@ app.get('/qrcode/:id', (req, res) => {
 
   client.on('authenticated', () => {
     io.emit('authenticated', { id: id });
-    io.emit('message', { id: id, text: 'Whatsapp is authenticated!' });
+    console.log({ id: id, text: 'Whatsapp is authenticated!' });
   });
 
   client.on('auth_failure', function() {
-    io.emit('message', { id: id, text: 'Auth failure, restarting...' });
+   console.log({ id: id, text: 'Auth failure, restarting...' });
   });
 
   client.on('disconnected', (reason) => {
-    io.emit('message', { id: id, text: 'Whatsapp is disconnected!' });
+    console.log({ id: id, text: 'Whatsapp is disconnected!' });
     client.destroy();
     client.initialize();
 
