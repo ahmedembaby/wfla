@@ -409,14 +409,14 @@ app.get('/add-session/:id/:description', (req, res) => {
 app.get('/qrcode/:id', (req, res) => {
 
   io.on('connection', (socket) => {
-  console.log('2 connected via WebSocket.');
-
+  console.log('A client connected via WebSocket.');
+  
   socket.on('get-qr', (data) => {
     const { id } = data;
     const session = sessions.find(sess => sess.id === id);
 
-    if (!session) {
-      socket.emit('qr-error', { message: 'Session not found!' });
+    if (!session || !session.client) {
+      socket.emit('qr-error', { message: 'Session or client not found!' });
       return;
     }
 
