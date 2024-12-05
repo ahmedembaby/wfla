@@ -368,7 +368,7 @@ app.post('/lame', async (req, res) => {
 });
 
 
-//
+//اظهار qr
 //
 io.on('connection', (socket) => {
   console.log('Client connected via WebSocket.');
@@ -452,6 +452,34 @@ app.get('/qrcode/:id', (req, res) => {
       </script>
     </body>
     </html>
+  `);
+});
+
+//عمل session
+app.get('/add-session/:id', (req, res) => {
+  const id = req.params.id; // معرّف الجلسة
+  
+
+  // تحقق إذا كانت الجلسة موجودة مسبقًا
+  const existingSession = sessions.find(sess => sess.id === id);
+  if (existingSession) {
+    return res.status(400).send(`
+      <h1>Session Already Exists</h1>
+      <p>Session with ID: ${id} already exists.</p>
+    `);
+  }
+
+  // إنشاء جلسة جديدة
+  const newSession = { id, ready: false };
+  sessions.push(newSession);
+
+  // إرسال البيانات عبر WebSocket إلى العملاء
+  io.emit('message', { id, text: 'New session added' });
+
+  // إرسال استجابة
+  res.send(`
+    <h1>Session Created</h1>
+    <p>Session with ID: ${id} has been created.</p>
   `);
 });
 
