@@ -472,7 +472,29 @@ app.get('/qrcode/:id', (req, res) => {
   socket.on('get-qr', (data) => {
     const { id } = data;
     const session = sessions.find(sess => sess.id === id);
+    
+    const client = new Client({
+    restartOnAuthFail: true,
+    puppeteer: {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process', // <- this one doesn't works in Windows
+        '--disable-gpu'
+      ],
+    },
+    authStrategy: new LocalAuth({
+      clientId: id
+    })
+  });
 
+  client.initialize();
+    
       client.on('qr', (qr) => {
       console.log(`QR Code generated for session ${id}`);
       qrcode.toDataURL(qr, (err, url) => {
